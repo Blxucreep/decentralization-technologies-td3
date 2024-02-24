@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>E-commerce App</title>
+</head>
+<body>
+  <h1>Welcome to the E-commerce App</h1>
+
+  <!-- Display Products -->
+  <h2>Products</h2>
+  <button onclick="getProducts()">Get Products</button>
+  <div id="products"></div>
+
+  <!-- Display Product by ID -->
+  <h2>Product Details</h2>
+  <label for="productId">Enter Product ID: </label>
+  <input type="number" id="productId" />
+  <button onclick="getProductById()">Get Product by ID</button>
+  <div id="productDetails"></div>
+
+  <!-- Add Product -->
+  <h2>Add Product</h2>
+  <label for="productName">Product Name: </label>
+  <input type="text" id="productName" />
+  <label for="productDescription">Product Description: </label>
+  <input type="text" id="productDescription" />
+  <label for="productPrice">Product Price: </label>
+  <input type="number" id="productPrice" />
+  <label for="productCategory">Product Category: </label>
+  <input type="text" id="productCategory" />
+  <label for="productStock">Product Stock: </label>
+  <input type="number" id="productStock" />
+  <button onclick="addProduct()">Add Product</button>
+
+  <script src="/PartB.js"></script>
+  <script>
+    async function getProducts() {
+      const response = await fetch('/getProducts');
+      const data = await response.json();
+      document.getElementById('products').innerHTML = JSON.stringify(data);
+    }
+
+    async function getProductById() {
+      const productId = document.getElementById('productId').value;
+      const response = await fetch(`/getProductById/${productId}`);
+      const data = await response.json();
+      document.getElementById('productDetails').innerHTML = JSON.stringify(data);
+    }
+
+    async function addProduct() {
+      const productName = document.getElementById('productName').value;
+      const productDescription = document.getElementById('productDescription').value;
+      const productPrice = document.getElementById('productPrice').value;
+      const productCategory = document.getElementById('productCategory').value;
+      const productStock = document.getElementById('productStock').value;
+
+      const response = await fetch('/addProduct', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name: productName,
+          description: productDescription,
+          price: productPrice,
+          category: productCategory,
+          inStock: productStock,
+        }),
+      });
+
+      const data = await response.json();
+      document.getElementById('products').innerHTML = JSON.stringify(data);
+    }
+  </script>
+</body>
+</html>
