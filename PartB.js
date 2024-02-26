@@ -21,6 +21,8 @@ app.get('/getServer', (req, res) => {
 // Question 3 - E-commerce API
 
 // Database
+// Sample data for products, orders, and cart
+
 let products = [
   { id: 1, name: 'Product A', description: 'Description A', price: 10, category: 'Category A', inStock: 20 },
   { id: 2, name: 'Product B', description: 'Description B', price: 15, category: 'Category B', inStock: 15 },
@@ -154,7 +156,6 @@ app.post('/addProduct', (req, res) => {
 });
 
 // ... (Autres routes)
-
 app.listen(port, () => {
   console.log(`Server running on http://localhost:${port}`);
 });
