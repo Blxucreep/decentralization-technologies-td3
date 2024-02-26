@@ -1,5 +1,6 @@
 const express = require('express');
 const bodyParser = require('body-parser');
+const path = require('path');
 
 const app = express();
 const port = 3000;
@@ -19,7 +20,9 @@ app.get('/getServer', (req, res) => {
 
 // Question 3 - E-commerce API
 
+// Database
 // Sample data for products, orders, and cart
+
 let products = [
   { id: 1, name: 'Product A', description: 'Description A', price: 10, category: 'Category A', inStock: 20 },
   { id: 2, name: 'Product B', description: 'Description B', price: 15, category: 'Category B', inStock: 15 },
@@ -31,7 +34,6 @@ let cart = {};
 // Products Routes
 
 app.get('/products', (req, res) => {
- 
   res.json(products);
 });
 
@@ -124,6 +126,36 @@ app.delete('/cart/:userId/item/:productId', (req, res) => {
   res.json({ cart: cart[userId] || {} });
 });
 
+// Question 5 - Serve the HTML file
+app.get('/index.html', (req, res) => {
+  res.sendFile(path.join(__dirname, 'index.html'));
+});
+
+// Fonctions pour les interactions front-end
+app.get('/getProducts', (req, res) => {
+  res.json(products);
+});
+
+app.get('/getProductById/:id', (req, res) => {
+  const productId = parseInt(req.params.id);
+  const product = products.find(product => product.id === productId);
+
+  if (!product) {
+    res.status(404).json({ error: 'Product not found' });
+  } else {
+    res.json(product);
+  }
+});
+
+app.post('/addProduct', (req, res) => {
+  const newProduct = req.body;
+  newProduct.id = products.length + 1;
+  products.push(newProduct);
+
+  res.json(newProduct);
+});
+
+// ... (Autres routes)
 app.listen(port, () => {
   console.log(`Server running on http://localhost:${port}`);
 });
