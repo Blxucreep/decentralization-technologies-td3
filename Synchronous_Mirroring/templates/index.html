@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Site de démo Flask</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            // Affichage de tous les produits au chargement de la page
+            fetchProducts();
+
+            // Recherche des produits avec filtres
+            $('#filterProducts').click(function() {
+                const category = $('#categoryFilter').val();
+                const inStock = $('#inStockFilter').val();
+                fetchProducts(category, inStock);
+            });
+
+            function fetchProducts(category = '', inStock = '') {
+                let url = '/products';
+                const params = [];
+                if (category) params.push(`category=${category}`);
+                if (inStock) params.push(`inStock=${inStock}`);
+                if (params.length) url += `?${params.join('&')}`;
+
+                fetch(url)
+                .then(response => response.json())
+                .then(products => {
+                    const productList = $('#productList');
+                    productList.empty();
+                    products.forEach(product => {
+                        productList.append(`<li>${product.id} -${product.name} - ${product.category} - ${product.price}€ - En stock: ${product.inStock ? 'Oui' : 'Non'}</li>`);
+                    });
+                })
+                .catch(error => console.error('Erreur lors de la récupération des produits:', error));
+            }
+            
+            $('#searchOrders').click(function() {
+              const userId = $('#userId').val();
+              fetchOrders(userId);
+            });
+
+            function fetchOrders(userId) {
+              if (!userId) {
+                  alert("Veuillez entrer un ID utilisateur.");
+                  return;
+              }
+
+              fetch(`/orders/${userId}`)
+              .then(response => response.json())
+              .then(orders => {
+                  const ordersList = $('#ordersList');
+                  ordersList.empty();
+
+                  if (Array.isArray(orders) && orders.length) {
+                      orders.forEach(order => {
+                          ordersList.append(`<li>Order ID: ${order.orderId} - Total: ${order.totalPrice}€ - Status: ${order.status}</li>`);
+                      });
+                  } else {
+                      ordersList.append("<li>Aucune commande trouvée pour cet utilisateur.</li>");
+                  }
+              })
+              .catch(error => console.error('Erreur lors de la récupération des commandes:', error));
+          }
+
+              // Fonction pour récupérer et afficher le panier de l'utilisateur
+              $('#viewCart').click(function() {
+                const userId = $('#cartUserId').val();
+                fetchCart(userId);
+            });
+
+            function fetchCart(userId) {
+                if (!userId) {
+                    alert("Veuillez entrer un ID utilisateur.");
+                    return;
+                }
+
+                fetch(`/cart/${userId}`)
+                .then(response => response.json())
+                .then(cart => {
+                    const cartList = $('#cartList');
+                    cartList.empty();
+
+                    if (cart.cart && cart.cart.length > 0) {
+                        cart.cart.forEach(item => {
+                            cartList.append(`<li>Produit ID: ${item.productId}, Quantité: ${item.quantity}</li>`);
+                        });
+                    } else {
+                        cartList.append("<li>Le panier est vide ou l'utilisateur n'existe pas.</li>");
+                    }
+                })
+                .catch(error => console.error('Erreur lors de la récupération du panier:', error));
+            }
+
+            // Intercepter la soumission du formulaire d'ajout au panier
+            $('form[action="/cart"]').submit(function(event) {
+              event.preventDefault(); 
+
+              const formData = $(this).serialize(); 
+              const userId = $(this).find('input[name="userId"]').val(); 
+
+              fetch(`/cart/${userId}`, {
+                  method: 'POST',
+                  headers: {
+                      'Content-Type': 'application/json'
+                  },
+                  body: JSON.stringify(Object.fromEntries(new URLSearchParams(formData)))
+              })
+              .then(response => response.json())
+              .then(data => {
+                  alert('Article ajouté au panier !');
+                  console.log(data); 
+              })
+              .catch(error => console.error('Erreur lors de l\'ajout au panier:', error));
+          });
+
+
+            // Intercepter la soumission du formulaire d'ajout au panier
+            $('form[action="/products"]').submit(function(event) {
+              event.preventDefault(); 
+
+              const formData = $(this).serialize(); 
+
+              fetch(`/products`, {
+                  method: 'POST',
+                  headers: {
+                      'Content-Type': 'application/json'
+                  },
+                  body: JSON.stringify(Object.fromEntries(new URLSearchParams(formData)))
+              })
+              .then(response => response.json())
+              .then(data => {
+                  alert('Produit ajouté !');
+                  console.log(data); 
+                  window.location.reload();
+              })
+              .catch(error => console.error('Erreur lors de l\'ajout du produit:', error));
+          });
+        });
+
+        // Supprimer d'articles du panier
+        function removeFromCart() {
+            const userId = document.getElementById('userIdForRemove').value;
+            const productId = document.getElementById('productIdForRemove').value;
+        
+            
+            if (!userId || !productId) {
+                alert("Veuillez fournir à la fois l'ID de l'utilisateur et l'ID du produit.");
+                return;
+            }
+        
+            fetch(`/cart/${userId}/item/${productId}`, {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                alert(JSON.stringify(data));
+
+                window.location.reload();
+            })
+            .catch(error => console.error('Erreur lors de la suppression du produit du panier:', error));
+        }
+        
+        // Suppression de commandes
+        function removeFromProduct() {
+            const productId = document.getElementById('productIdForRemove2').value;
+        
+            if (!productId) {
+                alert("Veuillez fournir l'ID du produit.");
+                return;
+            }
+        
+            fetch(`/products/${productId}`, {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                alert(JSON.stringify(data));
+        
+            })
+            .catch(error => console.error('Erreur lors de la suppression du produit :', error));
+            window.location.reload();
+        }
+        
+
+    </script>
+</head>
+<body>
+    <h1>Bienvenue sur notre site de démo Flask!</h1>
+    
+    <!-- Formulaire pour ajouter un produit -->
+    <h2>Ajouter un produit</h2>
+    <form action="/products" method="post">
+        <input type="text" name="name" placeholder="Nom du produit" required>
+        <input type="text" name="category" placeholder="Catégorie" required>
+        <input type="text" name="inStock" placeholder="En stock (true/false)" required>
+        <input type="number" name="price" placeholder="Prix" step="0.01" required>
+        <button type="submit">Ajouter</button>
+    </form>
+    
+    <!-- Supprimer le produit -->
+    <h2>Supprimer le produit</h2>
+    <input type="number" id="productIdForRemove2" placeholder="ID du produit">
+    <button onclick="removeFromProduct()">Supprimer le produit</button>
+    
+    <!-- Affichage des résultats -->
+    <pre id="results"></pre>
+
+    <!-- Formulaire pour ajouter au panier -->
+    <h2>Ajouter au panier</h2>
+    <form action="/cart" method="post">
+        <input type="number" name="userId" placeholder="ID de l'utilisateur" required>
+        <input type="number" name="productId" placeholder="ID du produit" required>
+        <input type="number" name="quantity" placeholder="Quantité" required>
+        <button type="submit">Ajouter au panier</button>
+    </form>
+    
+    <!-- Supprimer du panier -->
+    <h2>Supprimer du panier</h2>
+    <input type="number" id="userIdForRemove" placeholder="ID de l'utilisateur">
+    <input type="number" id="productIdForRemove" placeholder="ID du produit">
+    <button onclick="removeFromCart()">Supprimer du panier</button>
+    
+    <!-- Affichage des résultats -->
+    <pre id="results"></pre>
+
+    <!-- Section pour afficher et filtrer les produits -->
+    <h2>Afficher et filtrer les produits</h2>
+    <input type="text" id="categoryFilter" placeholder="Filtrer par catégorie">
+    <select id="inStockFilter">
+        <option value="">Tous</option>
+        <option value="true">En stock</option>
+        <option value="false">Hors stock</option>
+    </select>
+    <button id="filterProducts">Filtrer les produits</button>
+
+    <ul id="productList"></ul>
+
+    <!-- Section pour rechercher et afficher les commandes par ID utilisateur -->
+    <h2>Rechercher les commandes par ID utilisateur</h2>
+    <input type="number" id="userId" placeholder="Entrer ID utilisateur">
+    <button id="searchOrders">Rechercher commandes</button>
+
+    <ul id="ordersList"></ul>
+
+    <!-- Section pour afficher le panier d'un utilisateur -->
+    <h2>Voir le panier d'un utilisateur</h2>
+    <input type="number" id="cartUserId" placeholder="Entrer ID utilisateur pour le panier">
+    <button id="viewCart">Voir le panier</button>
+
+    <ul id="cartList"></ul>
+</body>
+</html>
+    

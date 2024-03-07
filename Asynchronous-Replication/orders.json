@@ -1,0 +1,52 @@
+{
+    "orders": [
+        {
+            "orderId": 1,
+            "userId": 123,
+            "products": [
+                {
+                    "productId": 1,
+                    "quantity": 2
+                },
+                {
+                    "productId": 2,
+                    "quantity": 1
+                }
+            ],
+            "totalPrice": 59.97,
+            "status": "Placed"
+        },
+        {
+            "orderId": 2,
+            "userId": 124,
+            "products": [
+                {
+                    "productId": 3,
+                    "quantity": 1
+                },
+                {
+                    "productId": 4,
+                    "quantity": 2
+                }
+            ],
+            "totalPrice": 89.99,
+            "status": "Shipped"
+        },
+        {
+            "orderId": 3,
+            "products": [
+                {
+                    "id": 1,
+                    "quantity": 2
+                },
+                {
+                    "id": 2,
+                    "quantity": 1
+                }
+            ],
+            "totalPrice": 2199.9700000000003,
+            "status": "Placed",
+            "userId": 12
+        }
+    ]
+}
