@@ -1,9 +1,37 @@
-{
-    "123": [],
-    "124": [
-        {
-            "productId": 3,
-            "quantity": 6
-        }
-    ]
-}
+[
+    {
+        "id": 1,
+        "name": "Produit A",
+        "category": 1,
+        "inStock": false,
+        "price": 10.99
+    },
+    {
+        "id": 2,
+        "name": "Produit B",
+        "category": 2,
+        "inStock": false,
+        "price": 15.99
+    },
+    {
+        "id": 3,
+        "name": "Produit C",
+        "category": 1,
+        "inStock": true,
+        "price": 8.99
+    },
+    {
+        "id": 4,
+        "name": "Produit F",
+        "category": "3",
+        "inStock": true,
+        "price": "100"
+    },
+    {
+        "id": 5,
+        "name": "Produit G",
+        "category": "2",
+        "inStock": true,
+        "price": "17"
+    }
+]

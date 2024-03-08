@@ -2,59 +2,31 @@
     "products": [
         {
             "id": 1,
-            "name": "Ordinateur Portable",
-            "category": "Electronique",
-            "inStock": true,
-            "price": 999.99
+            "name": "Produit A",
+            "category": 1,
+            "inStock": false,
+            "price": 10.99
         },
         {
             "id": 2,
-            "name": "Casque Bluetooth",
-            "category": "Accessoires",
-            "inStock": true,
-            "price": 199.99
+            "name": "Produit B",
+            "category": 2,
+            "inStock": false,
+            "price": 15.99
         },
         {
             "id": 3,
-            "name": "Souris sans fil",
-            "category": "Accessoires",
-            "inStock": false,
-            "price": 49.99
+            "name": "Produit C",
+            "category": 1,
+            "inStock": true,
+            "price": 8.99
         },
         {
             "id": 4,
-            "name": "Clavier Mecanique",
-            "category": "Accessoires",
+            "name": "Produit D",
+            "category": "4",
             "inStock": true,
-            "price": 89.99
-        },
-        {
-            "id": 5,
-            "name": "Ecran 24 pouces",
-            "category": "Electronique",
-            "inStock": true,
-            "price": 249.99
-        },
-        {
-            "id": 6,
-            "name": "Ecouteurs Bluetooth",
-            "category": "Accessoires",
-            "inStock": true,
-            "price": 149.99
-        },
-        {
-            "id": 8,
-            "name": "Galaxy S20",
-            "category": "Accessoires",
-            "inStock": "true",
-            "price": "1000"
-        },
-        {
-            "id": 9,
-            "name": "IPhone",
-            "category": "Accessoires",
-            "inStock": "Oui",
-            "price": "999.99"
+            "price": "18"
         }
     ]
 }

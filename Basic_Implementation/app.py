@@ -6,6 +6,7 @@ port = 3001
 
 @app.route('/')
 def index():
+    # Vous pouvez inclure des données dynamiques ici
     message = "Bienvenue sur notre site !"
     return render_template('index.html', message=message)
 
@@ -17,9 +18,8 @@ def hello_world():
 def get_server():
     return jsonify(code=200, server=f"localhost:{port}")'''
 
-with open('C:/Users/joshu/OneDrive/Documents/ESILV/A4_S8/Decentralization_Technologies/td3anouk2/TP3/TP3/Basic_Implementation/products.json', 'r', encoding='utf-8') as file:
+with open('products.json', 'r', encoding='utf-8') as file:
     products = json.load(file)['products']
-
 
 @app.route('/products', methods=['GET'])
 def get_products():
@@ -30,6 +30,11 @@ def get_products():
     
     # Filtre par catégorie
     if category:
+        try:
+            category = int(category)
+        except (TypeError, ValueError):
+            return jsonify({"error": "Invalid product ID"}), 400 #erreur si la catégorie ne peut être convertit en entier 
+        #à modifier en fonction des valeurs qu'on donnera à category
         filtered_products = [product for product in filtered_products if product['category'] == category]
     
     # Filtre par disponibilité en stock
@@ -73,7 +78,7 @@ def add_product():
     })
 
     # Sauvegarder dans products.json
-    with open('C:/Users/joshu/OneDrive/Documents/ESILV/A4_S8/Decentralization_Technologies/td3anouk2/TP3/TP3/Basic_Implementation/products.json', 'w', encoding='utf-8') as file:
+    with open('products.json', 'w', encoding='utf-8') as file:
         json.dump({"products": products}, file, indent=4)
 
     return jsonify({"message": "Product added successfully"}), 201
@@ -85,27 +90,20 @@ def add_product():
 
 @app.route('/products/<int:id>', methods=['PUT'])
 def update_product(id):
-    product_data = request.get_json()
+    product_data = request.json
     product = next((product for product in products if product['id'] == id), None)
     
-    if not product:
+    if product is None:
         return jsonify({"error": "Product not found"}), 404
 
-    if 'name' in product_data:
-        product['name'] = product_data['name']
-    if 'category' in product_data:
-        product['category'] = product_data['category']
-    if 'inStock' in product_data:
-        product['inStock'] = product_data['inStock']
-    if 'price' in product_data:
-        product['price'] = product_data['price']
-
-    with open('C:/Users/joshu/OneDrive/Documents/ESILV/A4_S8/Decentralization_Technologies/td3anouk2/TP3/TP3/Basic_Implementation/products.json', 'w', encoding='utf-8') as file:
-        json.dump({"products": products}, file, indent=4)
+    product_keys = product.keys()
+    for key in product_data.keys():
+        if key in product_keys:
+            product[key] = product_data[key]
 
     return jsonify(product), 200
 
-#curl -X PUT http://127.0.0.1:3001/products/7 -H "Content-Type: application/json" -d "{\"price\": 11.99}"
+#curl -X PUT http://127.0.0.1:3001/products/4 -H "Content-Type: application/json" -d "{\"price\": 11.99}"
 
 @app.route('/products/<int:id>', methods=['DELETE'])
 def delete_product(id):
@@ -117,18 +115,18 @@ def delete_product(id):
 
     products = [product for product in products if product['id'] != id]
     
-    with open('C:/Users/joshu/OneDrive/Documents/ESILV/A4_S8/Decentralization_Technologies/td3anouk2/TP3/TP3/Basic_Implementation/products.json', 'w', encoding='utf-8') as file:
+    with open('products.json', 'w', encoding='utf-8') as file:
         json.dump({"products": products}, file, indent=4)
     
     return jsonify({"message": "Product deleted successfully"}), 200
 
-#curl -X DELETE http://127.0.0.1:3001/products/7
+#curl -X DELETE http://127.0.0.1:3001/products/4
+
 
 
 try:
-    with open('C:/Users/joshu/OneDrive/Documents/ESILV/A4_S8/Decentralization_Technologies/td3anouk2/TP3/TP3/Basic_Implementation/orders.json', 'r', encoding='utf-8') as file:
-        orders_data = json.load(file)
-    orders = orders_data["orders"] 
+    with open('orders.json', 'r', encoding='utf-8') as file:
+        orders = json.load(file)
 except FileNotFoundError:
     orders = []
 
@@ -139,18 +137,13 @@ def create_order():
 
     order_data = request.json
     total_price = 0
-
-    try:
-        user_id = int(order_data.get('userId'))
-    except ValueError:
-        return jsonify({"error": "Invalid user ID format"}), 400
-
+    
     # Calculer le total_price basé sur les produits commandés
     for item in order_data['products']:
         product = next((product for product in products if product['id'] == item['id']), None)
         if product:
             total_price += product['price'] * item['quantity']
-
+    
     # Déterminer le prochain orderId
     if orders:
         order_id_counter = max(order['orderId'] for order in orders) + 1
@@ -162,100 +155,102 @@ def create_order():
         'products': order_data['products'],
         'totalPrice': total_price,
         'status': 'Placed',
-        'userId': user_id 
+        'userId': order_data.get('userId', 'Anonymous')
     }
     orders.append(new_order)
-
-    with open('C:/Users/joshu/OneDrive/Documents/ESILV/A4_S8/Decentralization_Technologies/td3anouk2/TP3/TP3/Basic_Implementation/orders.json', 'w', encoding='utf-8') as file:
-        json.dump({"orders": orders}, file, indent=4)  
-
+    
+    # Sauvegarder dans orders.json
+    with open('orders.json', 'w', encoding='utf-8') as file:
+        json.dump(orders, file, indent=4)
 
     return jsonify({"message": "Order created successfully"}), 201
 
 
+#curl -X POST http://127.0.0.1:3001/orders -H "Content-Type: application/json" -d "{\"products\": [{\"id\": 1, \"quantity\": 2}, {\"id\": 2, \"quantity\": 1}], \"userId\": \"123456\"}"
 
-#curl -X POST http://127.0.0.1:3001/orders -H "Content-Type: application/json" -d "{\"userId\": 123, \"products\": [{\"id\": 1, \"quantity\": 2}, {\"id\": 2, \"quantity\": 1}]}"
 
-
-@app.route('/orders/<int:userId>', methods=['GET'])
+@app.route('/orders/<userId>', methods=['GET'])
 def get_orders_by_user(userId):
-    user_orders = [order for order in orders if order['userId'] == userId]
-    if not user_orders:
-        return jsonify({"error": "No orders found for user"}), 404
-    return jsonify(user_orders), 200
+    # Convertir userId en entier si nécessaire
+    try:
+        user_id_int = int(userId)
+        user_orders = [order for order in orders if order['userId'] == user_id_int]
+    except ValueError:
+        # Si la conversion échoue, cela signifie que userId n'est pas un entier valide
+        return jsonify({"error": "Invalid user ID format"}), 400
+
+    return jsonify(user_orders), 200 if user_orders else 404
 
 
-#curl -X GET "http://127.0.0.1:3001/orders/123"
+#curl -X GET "http://127.0.0.1:3001/orders/123456"
+
+
 
 
 try:
-    with open('C:/Users/joshu/OneDrive/Documents/ESILV/A4_S8/Decentralization_Technologies/td3anouk2/TP3/TP3/Basic_Implementation/carts.json', 'r', encoding='utf-8') as file:
+    with open('carts.json', 'r', encoding='utf-8') as file:
         carts = json.load(file)
 except FileNotFoundError:
     carts = {}
 
+
 @app.route('/cart/<userId>', methods=['POST'])
 def add_to_cart(userId):
     cart_data = request.get_json()
-    product_id = int(cart_data.get('productId'))  
-    quantity = int(cart_data.get('quantity', 1))  
-    
-    # Convertir userId en chaîne pour une utilisation comme clé de dictionnaire
-    userId_str = str(userId)
+    product_id = cart_data.get('productId')  # Renommer 'products' en 'productId'
+    quantity = cart_data.get('quantity')
 
-    if userId_str not in carts:
-        carts[userId_str] = []
+    # Vérifier si l'utilisateur a déjà un panier
+    if userId not in carts:
+        carts[userId] = []
 
-    found = False
-    for item in carts[userId_str]:
-        if item['productId'] == product_id:
-            item['quantity'] += quantity
-            found = True
-            break
+    # Ajouter le produit au panier de l'utilisateur
+    carts[userId].append({'productId': product_id, 'quantity': quantity})
 
-    if not found:
-        carts[userId_str].append({'productId': product_id, 'quantity': quantity})
-
-    with open('C:/Users/joshu/OneDrive/Documents/ESILV/A4_S8/Decentralization_Technologies/td3anouk2/TP3/TP3/Basic_Implementation/carts.json', 'w', encoding='utf-8') as file:
+    # Sauvegarder dans carts.json
+    with open('carts.json', 'w', encoding='utf-8') as file:
         json.dump(carts, file, indent=4)
 
-    return jsonify({"message": "Product added to cart successfully"}), 201
+    return jsonify({"message": "Producted added to cart successfully"}), 201       
+        
 
-
-#curl -X POST http://127.0.0.1:3001/cart/123 -H "Content-Type: application/json" -d '{"productId": 3, "quantity": 5}'
-
-
+#curl -X POST http://127.0.0.1:3001/cart/123456 -H "Content-Type: application/json" -d '{"productId": 3, "quantity": 5}'
 
 @app.route('/cart/<userId>', methods=['GET'])
 def get_cart(userId):
-    userId_str = str(userId) 
-    if userId_str not in carts:
+    # Vérifier si l'utilisateur a un panier
+    if userId not in carts:
         return jsonify({'error': 'User has no cart'}), 404
 
-    return jsonify({'cart': carts[userId_str]}), 200
+    # Renvoyer le contenu du panier de l'utilisateur en réponse
+    return jsonify({'cart': carts[userId]}), 200
 
-
-#curl -X GET http://127.0.0.1:3001/cart/123
+#curl -X GET http://127.0.0.1:3001/cart/123456 
 
 @app.route('/cart/<userId>/item/<productId>', methods=['DELETE'])
 def remove_from_cart(userId, productId):
-    userId_str = str(userId) 
-    if userId_str not in carts:
+    # Vérifier si l'utilisateur a un panier
+    if userId not in carts:
         return jsonify({'error': 'User has no cart'}), 404
 
-    product_index = next((i for i, item in enumerate(carts[userId_str]) if item['productId'] == int(productId)), None)
+    # Recherchez l'index du produit dans le panier de l'utilisateur
+    product_index = next((i for i, item in enumerate(carts[userId]) if item['productId'] == int(productId)), None)
+
+    # Vérifier si le produit est présent dans le panier de l'utilisateur
     if product_index is None:
         return jsonify({'error': 'Product not found in user\'s cart'}), 404
 
-    del carts[userId_str][product_index]
-
-    with open('C:/Users/joshu/OneDrive/Documents/ESILV/A4_S8/Decentralization_Technologies/td3anouk2/TP3/TP3/Basic_Implementation/carts.json', 'w', encoding='utf-8') as file:
+    # Supprimer le produit du panier de l'utilisateur
+    del carts[userId][product_index]
+    
+    # Sauvegarder dans carts.json
+    with open('carts.json', 'w', encoding='utf-8') as file:
         json.dump(carts, file, indent=4)
 
+    # Renvoyer le contenu mis à jour du panier en réponse
     return jsonify({"message": "Product deleted successfully"}), 200
 
-
-#curl -X DELETE http://127.0.0.1:3001/cart/123/item/3
+#curl -X DELETE http://127.0.0.1:3001/cart/123456/item/1
 
 
 if __name__ == '__main__':

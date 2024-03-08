@@ -1,9 +1,12 @@
 {
-    "123": [],
-    "124": [
+    "123456": [
         {
-            "productId": 3,
-            "quantity": 6
+            "productId": 1,
+            "quantity": 2
+        },
+        {
+            "productId": 2,
+            "quantity": 1
         }
     ]
 }
