@@ -182,10 +182,13 @@ Q8-bis: implement asynchronous replication using two different database structur
 For those two last questions, let's answer it directly here by showing you a couple of screenshots. Keep in mind that the codes are in two folders that you can find on this GitHub.
 
 ![image](site.png)
+
 Here you can see that I tried to add the last IPhone on the website. If you can see it, it means that the json database is working well. With synchronous mirroring, we've got to check if the second structure, Postgre, received the data correctly.
 
 ![image2](postgre.png)
+
 It worked well. Note that the two databases are filled differently, it's due to the fact that we took the same database we've already worked on for questions 7 and 8. Synchronous mirroring as it is coded here doesn't allow Postgre to look at the data json already have, but Asynchronous mirroring will give Postgre this skill.
+
 ---
 
 This version corrects spelling mistakes (e.g., "postgress" to "PostgreSQL", "inderact" to "interact"), clarifies instructions, and makes minor grammatical adjustments for readability.
